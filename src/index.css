@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #fff;
+  color: #404145;
+  line-height: 1.5;
+  font-size: 14px; /* Decreased from default 16px */
+}
+
+/* Decrease font sizes for headings */
+h1 {
+  font-size: 1.5rem; /* Decreased from 2rem */
+}
+
+h2 {
+  font-size: 1.25rem; /* Decreased from 1.5rem */
+}
+
+h3 {
+  font-size: 1.125rem; /* Decreased from 1.25rem */
+}
+
+/* Decrease font sizes for specific elements */
+.text-2xl {
+  font-size: 1.25rem !important; /* Decreased from 1.5rem */
+}
+
+.text-xl {
+  font-size: 1.125rem !important; /* Decreased from 1.25rem */
+}
+
+.text-lg {
+  font-size: 1rem !important; /* Decreased from 1.125rem */
+}
+
+/* Make table text smaller */
+table {
+  font-size: 0.875rem;
+}
+
+/* Make buttons smaller */
+button {
+  font-size: 0.875rem;
+}
+
+/* Make inputs smaller */
+input, textarea, select {
+  font-size: 0.875rem;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c6c9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #95979d;
+}
+
+/* Slick Carousel Custom Styles */
+.slick-prev,
+.slick-next {
+  z-index: 10;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  color: #1dbf73;
+  font-size: 24px;
+}
+
+.slick-dots li button:before {
+  color: #1dbf73;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #1dbf73;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Loading Spinner */
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #1dbf73;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
