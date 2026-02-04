@@ -64,6 +64,20 @@ const Gig = () => {
     },
   });
 
+  // Fetch user orders to check if they can review
+  const { data: orders } = useQuery({
+    queryKey: ["myOrders"],
+    queryFn: async () => {
+      const res = await orderAPI.getOrders();
+      return res.data;
+    },
+    enabled: !!currentUser,
+  });
+
+  const hasPurchased = orders?.some(
+    (order) => order.gigId === id && order.buyerId?._id === currentUser?._id
+  );
+
   // Create review mutation
   const reviewMutation = useMutation({
     mutationFn: (data) => reviewAPI.createReview(data),
@@ -298,89 +312,75 @@ const Gig = () => {
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
-                  Reviews ({reviews?.length || 0})
+                  Reviews
                 </h2>
-                <Stars rating={parseFloat(rating)} count={gig.starNumber} />
               </div>
 
-              {/* Review Form */}
-              {currentUser && currentUser._id !== gig.userId?._id && (
-                <form
-                  onSubmit={handleReviewSubmit}
-                  className="mb-8 p-4 bg-gray-50 rounded-lg"
-                >
-                  <h3 className="font-semibold text-gray-900 mb-4">
-                    Leave a Review
+              {/* Add Review Form - Only for buyers who purchased */}
+              {currentUser && !currentUser.isSeller && hasPurchased && (
+                <div className="mb-8 border-b border-gray-200 pb-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Add a Review
                   </h3>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Rating
-                    </label>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() =>
-                            setReviewForm({ ...reviewForm, star })
-                          }
-                          className="p-1"
-                        >
-                          <FiStar
-                            className={`w-6 h-6 ${
-                              star <= reviewForm.star
-                                ? "text-yellow-400 fill-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        </button>
-                      ))}
+                  <form onSubmit={handleReviewSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Rating
+                      </label>
+                      <select
+                        value={reviewForm.star}
+                        onChange={(e) =>
+                          setReviewForm({ ...reviewForm, star: e.target.value })
+                        }
+                        className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+                      >
+                        <option value="1">1 Star</option>
+                        <option value="2">2 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="5">5 Stars</option>
+                      </select>
                     </div>
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Your Review
-                    </label>
-                    <textarea
-                      value={reviewForm.desc}
-                      onChange={(e) =>
-                        setReviewForm({ ...reviewForm, desc: e.target.value })
-                      }
-                      rows={4}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                      placeholder="Share your experience..."
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={reviewMutation.isPending}
-                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition disabled:opacity-50"
-                  >
-                    {reviewMutation.isPending ? "Submitting..." : "Submit Review"}
-                  </button>
-                  {reviewMutation.isError && (
-                    <p className="mt-2 text-red-500 text-sm">
-                      {reviewMutation.error?.response?.data?.message ||
-                        "Failed to submit review"}
-                    </p>
-                  )}
-                </form>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Review
+                      </label>
+                      <textarea
+                        value={reviewForm.desc}
+                        onChange={(e) =>
+                          setReviewForm({ ...reviewForm, desc: e.target.value })
+                        }
+                        rows={4}
+                        className="shadow-sm block w-full focus:ring-primary focus:border-primary sm:text-sm border border-gray-300 rounded-md"
+                        placeholder="Share your experience..."
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={reviewMutation.isPending}
+                      className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+                    >
+                      {reviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                    </button>
+                  </form>
+                </div>
               )}
 
-              {/* Reviews List */}
               {reviewsLoading ? (
                 <Loading text="Loading reviews..." />
-              ) : reviews && reviews.length > 0 ? (
-                <div>
-                  {reviews.map((review) => (
-                    <Review key={review._id} review={review} />
-                  ))}
-                </div>
               ) : (
-                <p className="text-gray-500 text-center py-8">
-                  No reviews yet. Be the first to review!
-                </p>
+                <div className="space-y-6">
+                  {reviews && reviews.length > 0 ? (
+                    reviews.map((review) => (
+                      <Review key={review._id} review={review} />
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">
+                      No reviews yet.
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           </div>

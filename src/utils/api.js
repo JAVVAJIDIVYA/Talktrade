@@ -1,3 +1,5 @@
+import { categoriesForFilter } from "./categories";
+
 // Mock API using localStorage
 
 const getFromStorage = (key) => JSON.parse(localStorage.getItem(key)) || [];
@@ -159,7 +161,7 @@ export const userAPI = {
 export const gigAPI = {
   createGig: async (data) => {
     const gigs = getFromStorage('gigs');
-    const newGig = { ...data, _id: Date.now().toString() };
+    const newGig = { ...data, _id: Date.now().toString(), createdAt: new Date().toISOString() };
     gigs.push(newGig);
     saveToStorage('gigs', gigs);
     return { data: newGig };
@@ -212,6 +214,11 @@ export const gigAPI = {
   getGig: async (id) => {
     const gigs = getFromStorage('gigs');
     const gig = gigs.find(g => g._id === id);
+    // Populate userId (seller)
+    if (gig) {
+      const users = getFromStorage('users');
+      gig.userId = users.find(u => u._id === gig.userId);
+    }
     return { data: gig };
   },
   getMyGigs: async () => {
@@ -231,15 +238,45 @@ export const gigAPI = {
 // Order API
 export const orderAPI = {
   createOrder: async (data) => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const gigs = getFromStorage('gigs');
+    const users = getFromStorage('users');
+    const gig = gigs.find(g => g._id === data.gigId);
+    
+    if (!gig) throw new Error("Gig not found");
+    
+    // Find seller
+    let seller = users.find(u => u._id === gig.userId);
+    // If gig.userId is already populated or an object (in some flows), handle it
+    if (!seller && typeof gig.userId === 'object') seller = gig.userId;
+
     const orders = getFromStorage('orders');
-    const newOrder = { ...data, _id: Date.now().toString() };
+    const newOrder = { 
+      ...data, 
+      img: gig.cover,
+      title: gig.title,
+      price: gig.price,
+      sellerId: seller, // Store full object or just ID? Orders.jsx expects object with _id
+      buyerId: currentUser,
+      isCompleted: false,
+      paymentMethod: 'Stripe', // Mock
+      _id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    };
     orders.push(newOrder);
     saveToStorage('orders', orders);
     return { data: newOrder };
   },
   getOrders: async () => {
     const orders = getFromStorage('orders');
-    return { data: orders };
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) return { data: [] };
+    
+    const userOrders = orders.filter(o => 
+      (o.buyerId && o.buyerId._id === currentUser._id) || 
+      (o.sellerId && o.sellerId._id === currentUser._id)
+    );
+    return { data: userOrders };
   },
   confirmOrder: async (id) => {
     let orders = getFromStorage('orders');
@@ -253,7 +290,7 @@ export const orderAPI = {
 export const reviewAPI = {
   createReview: async (data) => {
     const reviews = getFromStorage('reviews');
-    const newReview = { ...data, _id: Date.now().toString() };
+    const newReview = { ...data, _id: Date.now().toString(), createdAt: new Date().toISOString() };
     reviews.push(newReview);
     saveToStorage('reviews', reviews);
     return { data: newReview };
@@ -275,7 +312,31 @@ export const reviewAPI = {
 export const conversationAPI = {
   createConversation: async (data) => {
     const conversations = getFromStorage('conversations');
-    const newConversation = { ...data, _id: Date.now().toString() };
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    // Check if conversation exists
+    const existing = conversations.find(c => 
+      (c.sellerId._id === currentUser._id && c.buyerId._id === data.to) ||
+      (c.buyerId._id === currentUser._id && c.sellerId._id === data.to)
+    );
+    
+    if (existing) return { data: existing };
+
+    const users = getFromStorage('users');
+    const toUser = users.find(u => u._id === data.to);
+    
+    const newConversation = {
+      id: Date.now().toString(), // Use 'id' to match standard, but we use '_id' generally. Let's use both or '_id'
+      _id: Date.now().toString(),
+      sellerId: currentUser.isSeller ? currentUser : toUser,
+      buyerId: currentUser.isSeller ? toUser : currentUser,
+      readBySeller: true,
+      readByBuyer: true,
+      lastMessage: "",
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    };
+    
     conversations.push(newConversation);
     saveToStorage('conversations', conversations);
     return { data: newConversation };
@@ -301,17 +362,54 @@ export const conversationAPI = {
 export const messageAPI = {
   createMessage: async (data) => {
     const messages = getFromStorage('messages');
-    const newMessage = { ...data, _id: Date.now().toString() };
+    const newMessage = { 
+      ...data, 
+      _id: Date.now().toString(), 
+      createdAt: new Date().toISOString() 
+    };
     messages.push(newMessage);
     saveToStorage('messages', messages);
+    
+    // Update conversation lastMessage
+    let conversations = getFromStorage('conversations');
+    const conversationIndex = conversations.findIndex(c => c._id === data.conversationId);
+    if (conversationIndex !== -1) {
+      conversations[conversationIndex].lastMessage = data.desc;
+      conversations[conversationIndex].updatedAt = new Date().toISOString();
+      // Mark unread for other user
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser.isSeller) {
+        conversations[conversationIndex].readByBuyer = false;
+        conversations[conversationIndex].readBySeller = true;
+      } else {
+        conversations[conversationIndex].readBySeller = false;
+        conversations[conversationIndex].readByBuyer = true;
+      }
+      saveToStorage('conversations', conversations);
+    }
+    
     return { data: newMessage };
   },
   getMessages: async (id) => {
     const messages = getFromStorage('messages');
     const conversationMessages = messages.filter(m => m.conversationId === id);
-    return { data: conversationMessages };
+    // Populate user
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const populatedMessages = conversationMessages.map(m => {
+      return { ...m, userId: m.userId || currentUser };
+    });
+    
+    return { data: populatedMessages };
   },
 };
+
+// Wrap createMessage to actually add userId
+const originalCreateMessage = messageAPI.createMessage;
+messageAPI.createMessage = async (data) => {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  return originalCreateMessage({ ...data, userId: currentUser });
+};
+
 
 // Admin API (mocked, no real admin logic)
 export const adminAPI = {
@@ -327,7 +425,24 @@ export const adminAPI = {
   getSellerRequests: async () => ({ data: [] }),
   approveSeller: async (userId) => ({ data: { message: 'Seller approved' } }),
   rejectSeller: async (userId) => ({ data: { message: 'Seller rejected' } }),
-  createEmployee: async (data) => ({ data: {} }),
+  createEmployee: async (data) => {
+    const users = getFromStorage('users');
+    const existingUser = users.find(u => u.username === data.username || u.email === data.email);
+    if (existingUser) {
+      throw new Error('User with this email or username already exists.');
+    }
+    const newEmployee = {
+      ...data,
+      _id: Date.now().toString(),
+      isSeller: true,
+      sellerRequestStatus: 'approved',
+      isAdmin: false,
+      img: `https://ui-avatars.com/api/?name=${data.username}&background=random`
+    };
+    users.push(newEmployee);
+    saveToStorage('users', users);
+    return { data: newEmployee };
+  },
   createGig: async (data) => ({ data: {} }),
   deleteGig: async (id) => ({ data: { message: 'Gig deleted' } }),
 };

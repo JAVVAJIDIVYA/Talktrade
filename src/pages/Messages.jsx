@@ -72,7 +72,7 @@ const Messages = () => {
               return (
                 <Link
                   key={conversation._id}
-                  to={`/message/${conversation.id}`}
+                  to={`/message/${conversation._id}`}
                   onClick={() => {
                     if (isUnread) {
                       markReadMutation.mutate(conversation.id);
