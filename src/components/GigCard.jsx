@@ -1,13 +1,20 @@
 import { Link } from "react-router-dom";
 import { FiStar, FiHeart } from "react-icons/fi";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { userAPI } from "../utils/api";
 import { formatINR } from "../utils/currency";
 
 const GigCard = ({ gig }) => {
+  console.log('GigCard received gig:', gig);
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
+
+  const { data: user, isLoading: isUserLoading } = useQuery({
+    queryKey: ["user", gig.userId],
+    queryFn: () => userAPI.getUser(gig.userId).then(res => res.data),
+    enabled: !!gig.userId,
+  });
 
   const rating =
     gig.starNumber > 0
@@ -63,27 +70,31 @@ const GigCard = ({ gig }) => {
       <div className="p-4">
         {/* Seller Info */}
         <div className="flex items-center mb-3">
-          <Link to={`/profile/${gig.userId?._id}`}>
-            <img
-              src={
-                gig.userId?.img ||
-                `https://ui-avatars.com/api/?name=${gig.userId?.username || "User"}&background=3b82f6&color=fff`
-              }
-              alt={gig.userId?.username}
-              className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-primary transition"
-              onError={(e) => {
-                e.target.src = `https://ui-avatars.com/api/?name=${gig.userId?.username || "User"}&background=3b82f6&color=fff`;
-              }}
-            />
-          </Link>
+          {isUserLoading ? (
+            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+          ) : (
+            <Link to={`/profile/${user?._id}`}>
+              <img
+                src={
+                  user?.img ||
+                  `https://ui-avatars.com/api/?name=${user?.username || "User"}&background=3b82f6&color=fff`
+                }
+                alt={user?.username}
+                className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-primary transition"
+                onError={(e) => {
+                  e.target.src = `https://ui-avatars.com/api/?name=${user?.username || "User"}&background=3b82f6&color=fff`;
+                }}
+              />
+            </Link>
+          )}
           <div className="ml-2">
             <Link
-              to={`/profile/${gig.userId?._id}`}
+              to={`/profile/${user?._id}`}
               className="text-sm font-medium text-gray-800 hover:text-primary"
             >
-              {gig.userId?.username || "Unknown"}
+              {isUserLoading ? 'Loading...' : user?.username || "Unknown"}
             </Link>
-            <p className="text-xs text-gray-500">{gig.userId?.country}</p>
+            <p className="text-xs text-gray-500">{user?.country}</p>
           </div>
         </div>
 

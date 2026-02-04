@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { FiPlus, FiX, FiUpload } from "react-icons/fi";
 import { gigAPI } from "../utils/api";
+import { categoriesForFilter } from "../utils/categories";
 
 const AddGig = () => {
   const navigate = useNavigate();
@@ -79,16 +80,6 @@ const AddGig = () => {
     mutation.mutate(gigData);
   };
 
-  const categories = [
-    { value: "design", label: "Graphics & Design" },
-    { value: "marketing", label: "Digital Marketing" },
-    { value: "writing", label: "Writing & Translation" },
-    { value: "video", label: "Video & Animation" },
-    { value: "programming", label: "Programming & Tech" },
-    { value: "business", label: "Business" },
-    { value: "music", label: "Music & Audio" },
-    { value: "ai", label: "AI Services" },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -137,7 +128,7 @@ const AddGig = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Select a category</option>
-                  {categories.map((cat) => (
+                  {categoriesForFilter.map((cat) => (
                     <option key={cat.value} value={cat.value}>
                       {cat.label}
                     </option>

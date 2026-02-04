@@ -13,6 +13,7 @@ import {
 import GigCard from "../components/GigCard";
 import Loading from "../components/Loading";
 import { gigAPI } from "../utils/api";
+import { categories } from "../utils/categories";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,56 +34,6 @@ const Home = () => {
     }
   };
 
-  const categories = [
-    {
-      name: "Graphics & Design",
-      icon: "🎨",
-      path: "/gigs?category=design",
-      color: "from-blue-400 to-blue-600",
-    },
-    {
-      name: "Digital Marketing",
-      icon: "📈",
-      path: "/gigs?category=marketing",
-      color: "from-blue-500 to-indigo-500",
-    },
-    {
-      name: "Writing & Translation",
-      icon: "✍️",
-      path: "/gigs?category=writing",
-      color: "from-indigo-400 to-blue-500",
-    },
-    {
-      name: "Video & Animation",
-      icon: "🎬",
-      path: "/gigs?category=video",
-      color: "from-blue-600 to-blue-400",
-    },
-    {
-      name: "Programming & Tech",
-      icon: "💻",
-      path: "/gigs?category=programming",
-      color: "from-blue-400 to-indigo-500",
-    },
-    {
-      name: "Business",
-      icon: "💼",
-      path: "/gigs?category=business",
-      color: "from-indigo-500 to-blue-600",
-    },
-    {
-      name: "Music & Audio",
-      icon: "🎵",
-      path: "/gigs?category=music",
-      color: "from-blue-500 to-blue-700",
-    },
-    {
-      name: "AI Services",
-      icon: "🤖",
-      path: "/gigs?category=ai",
-      color: "from-blue-400 to-indigo-400",
-    },
-  ];
 
   const trustedBy = [
     "Meta",

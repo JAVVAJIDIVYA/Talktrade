@@ -5,6 +5,7 @@ import { FiFilter, FiX, FiChevronDown } from "react-icons/fi";
 import GigCard from "../components/GigCard";
 import Loading from "../components/Loading";
 import { gigAPI, userAPI } from "../utils/api";
+import { categoriesForFilter } from "../utils/categories";
 import { useAuth } from "../context/AuthContext";
 
 const Gigs = () => {
@@ -32,7 +33,9 @@ const Gigs = () => {
       const res = await gigAPI.getGigs(params);
       return res.data;
     },
+    refetchOnMount: 'always',
   });
+
 
   const { data: favouriteGigsData } = useQuery({
     queryKey: ["favouriteGigs"],
@@ -81,17 +84,6 @@ const Gigs = () => {
     });
   };
 
-  const categories = [
-    { value: "", label: "All Categories" },
-    { value: "design", label: "Graphics & Design" },
-    { value: "marketing", label: "Digital Marketing" },
-    { value: "writing", label: "Writing & Translation" },
-    { value: "video", label: "Video & Animation" },
-    { value: "programming", label: "Programming & Tech" },
-    { value: "business", label: "Business" },
-    { value: "music", label: "Music & Audio" },
-    { value: "ai", label: "AI Services" },
-  ];
 
   const sortOptions = [
     { value: "createdAt", label: "Newest" },
@@ -103,7 +95,7 @@ const Gigs = () => {
 
   const getCategoryLabel = () => {
     if (showFavouritesOnly) return "My Favourites";
-    const cat = categories.find((c) => c.value === filters.category);
+    const cat = categoriesForFilter.find((c) => c.value === filters.category);
     return cat ? cat.label : "All Services";
   };
 
@@ -131,7 +123,7 @@ const Gigs = () => {
                 onChange={(e) => handleFilterChange("category", e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                {categories.map((cat) => (
+                {categoriesForFilter.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
                   </option>
@@ -210,7 +202,7 @@ const Gigs = () => {
                   onChange={(e) => handleFilterChange("category", e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 >
-                  {categories.map((cat) => (
+                  {categoriesForFilter.map((cat) => (
                     <option key={cat.value} value={cat.value}>
                       {cat.label}
                     </option>
@@ -261,9 +253,10 @@ const Gigs = () => {
           <Loading />
         ) : gigs && gigs.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {gigs.map((gig) => (
-              <GigCard key={gig._id} gig={gig} />
-            ))}
+            {gigs.map((gig) => {
+              console.log('Gig being passed to GigCard:', gig);
+              return <GigCard key={gig._id} gig={gig} />;
+            })}
           </div>
         ) : (
           <div className="text-center py-20">

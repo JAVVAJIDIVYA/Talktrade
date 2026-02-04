@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FiMenu, FiX, FiChevronDown, FiSearch } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import { authAPI } from "../utils/api";
+import { categories } from "../utils/categories";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,15 +42,6 @@ const Navbar = () => {
     }
   };
 
-  const categories = [
-    { name: "Graphics & Design", path: "/gigs?category=design" },
-    { name: "Digital Marketing", path: "/gigs?category=marketing" },
-    { name: "Writing & Translation", path: "/gigs?category=writing" },
-    { name: "Video & Animation", path: "/gigs?category=video" },
-    { name: "Programming & Tech", path: "/gigs?category=programming" },
-    { name: "Business", path: "/gigs?category=business" },
-    { name: "Music & Audio", path: "/gigs?category=music" },
-  ];
 
   return (
     <>
@@ -203,6 +195,16 @@ const Navbar = () => {
                         Favourites
                       </Link>
                       <hr className="my-2" />
+                      <button
+                        onClick={() => {
+                          localStorage.clear();
+                          alert('localStorage cleared');
+                          window.location.reload();
+                        }}
+                        className="block w-full text-left px-4 py-2 text-yellow-600 hover:bg-gray-100"
+                      >
+                        Clear localStorage (Dev)
+                      </button>
                       <button
                         onClick={() => {
                           setShowDropdown(false);
