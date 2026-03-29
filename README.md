@@ -133,19 +133,16 @@ JAVVAJIDIVYA-Talktrade-afa7c55/
 ### 🖼️ Screenshots
 
 <img src="https://github.com/JAVVAJIDIVYA/Talktrade/blob/main/Screenshot%202026-03-29%20101400.png" alt="Landing Page" width="100%">
-<em><p align="center">The Talktrade Home Page provides a professional entry point for users to explore documentation features.</p></em>
+
 
 <img src="https://github.com/JAVVAJIDIVYA/Talktrade/blob/main/Screenshot%202026-03-29%20101420.png" alt="Admin Dashboard" width="100%">
-<em><p align="center">The Admin Dashboard allows for comprehensive management of platform resources and user requests.</p></em>
+
 
 <img src="https://github.com/JAVVAJIDIVYA/Talktrade/blob/main/Screenshot%202026-03-29%20101455.png" alt="Gigs Listing" width="100%">
-<em><p align="center">The Gigs page showcases available documentation templates and services in a clean, card-based layout.</p></em>
 
 <img src="https://github.com/JAVVAJIDIVYA/Talktrade/blob/main/Screenshot%202026-03-29%20110613.png" alt="Login Page" width="100%">
-<em><p align="center">Secure Login and Registration interfaces ensure user data integrity and account protection.</p></em>
 
 <img src="https://github.com/JAVVAJIDIVYA/Talktrade/blob/main/Screenshot%202026-03-29%20110721.png" alt="Messaging" width="100%">
-<em><p align="center">Integrated messaging facilitates direct communication between users for customized documentation needs.</p></em>
 
 ---
 
