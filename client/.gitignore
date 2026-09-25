@@ -5,10 +5,9 @@ node_modules/
 dist/
 build/
 
-# Environment files
+# Environment files (only ignore secret files, not public production config)
 .env
 .env.local
-.env.production
 
 # Logs
 *.log
