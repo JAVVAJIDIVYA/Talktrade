@@ -1,0 +1,12 @@
+# Deploy Backend
+node_modules/
+.env
+*.log
+dist/
+build/
+uploads/*
+!uploads/.gitkeep
+
+# Development files
+.DS_Store
+Thumbs.db
