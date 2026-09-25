@@ -14,10 +14,13 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(safeGetUser());
 
   const login = (user) => {
-    setCurrentUser(user);
+    const { token, ...userInfo } = user;
+    if (token) localStorage.setItem("accessToken", token);
+    setCurrentUser(userInfo);
   };
 
   const logout = () => {
+    localStorage.removeItem("accessToken");
     setCurrentUser(null);
   };
 

@@ -76,11 +76,11 @@ export const login = async (req, res, next) => {
       .cookie("accessToken", token, {
         httpOnly: true,
         secure: isProd,
-        sameSite: isProd ? "none" : "lax",  // "none" required for cross-origin (Vercel→Render)
+        sameSite: isProd ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .status(200)
-      .json(info);
+      .json({ ...info, token }); // include token in body for cross-origin header auth
   } catch (error) {
     next(error);
   }
