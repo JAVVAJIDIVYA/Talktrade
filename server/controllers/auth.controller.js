@@ -70,12 +70,14 @@ export const login = async (req, res, next) => {
     // Remove password from response
     const { password: pass, ...info } = user._doc;
 
+    const isProd = process.env.NODE_ENV === "production";
+
     res
       .cookie("accessToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",  // "none" required for cross-origin (Vercel→Render)
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .status(200)
       .json(info);
@@ -85,11 +87,12 @@ export const login = async (req, res, next) => {
 };
 
 export const logout = async (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
   res
     .clearCookie("accessToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
     })
     .status(200)
     .json({ message: "User has been logged out." });
