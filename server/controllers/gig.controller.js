@@ -8,15 +8,17 @@ export const createGig = async (req, res, next) => {
       return next(createError(403, "Only sellers or admins can create gigs!"));
     }
 
-    // Admin can set userId; otherwise use current user
     const userId = isAdmin && req.body.userId ? req.body.userId : req.userId;
+
+    const priceValue = req.body.price ?? req.body.priceInr;
+    if (!priceValue) return next(createError(400, "Price is required"));
 
     const gigData = {
       userId,
       ...req.body,
-      priceInr: req.body.price ?? req.body.priceInr,
+      price: priceValue,
+      priceInr: priceValue,
     };
-    if (!gigData.priceInr) return next(createError(400, "Price is required"));
 
     const newGig = new Gig(gigData);
     const savedGig = await newGig.save();

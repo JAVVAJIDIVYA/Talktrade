@@ -44,19 +44,21 @@ export const login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
-    // Find user
+    if (!process.env.JWT_SECRET) {
+      console.error("❌ JWT_SECRET environment variable is not set!");
+      return next(createError(500, "Server configuration error: JWT_SECRET is missing."));
+    }
+
     const user = await User.findOne({ username });
     if (!user) {
       return next(createError(404, "User not found!"));
     }
 
-    // Check password
     const isCorrect = await bcrypt.compare(password, user.password);
     if (!isCorrect) {
       return next(createError(400, "Wrong password or username!"));
     }
 
-    // Create JWT token
     const token = jwt.sign(
       {
         id: user._id,
@@ -67,10 +69,9 @@ export const login = async (req, res, next) => {
       { expiresIn: "7d" }
     );
 
-    // Remove password from response
     const { password: pass, ...info } = user._doc;
 
-    const isProd = process.env.NODE_ENV === "production";
+    const isProd = process.env.NODE_ENV === "production" || process.env.VERCEL;
 
     res
       .cookie("accessToken", token, {
@@ -80,14 +81,14 @@ export const login = async (req, res, next) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .status(200)
-      .json({ ...info, token }); // include token in body for cross-origin header auth
+      .json({ ...info, token });
   } catch (error) {
     next(error);
   }
 };
 
 export const logout = async (req, res) => {
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = process.env.NODE_ENV === "production" || process.env.VERCEL;
   res
     .clearCookie("accessToken", {
       httpOnly: true,
