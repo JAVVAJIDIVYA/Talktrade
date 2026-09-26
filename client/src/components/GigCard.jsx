@@ -23,12 +23,16 @@ const GigCard = ({ gig }) => {
       queryClient.invalidateQueries(["gigs"]);
       queryClient.invalidateQueries(["favouriteGigs"]);
     },
+    onError: (err) => {
+      console.error("Favourite toggle failed:", err?.response?.data?.message || err.message);
+    },
   });
 
   const handleToggleFavourite = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!currentUser) return;
+    if (favouriteMutation.isPending) return;
     favouriteMutation.mutate();
   };
 
