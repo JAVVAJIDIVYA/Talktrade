@@ -137,18 +137,12 @@ app.use((err, req, res, next) => {
 
 export default app;
 
-if (!process.env.VERCEL) {
-  const PORT = process.env.PORT || 5001;
-  connectDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  }).catch((err) => {
-    console.error("Failed to start server:", err.message);
-    process.exit(1);
+const PORT = process.env.PORT || 5001;
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
   });
-} else {
-  connectDB().catch((err) => {
-    console.warn("Vercel cold-start DB connect failed (will retry on request):", err.message);
-  });
-}
+}).catch((err) => {
+  console.error("Failed to start server:", err.message);
+  process.exit(1);
+});
