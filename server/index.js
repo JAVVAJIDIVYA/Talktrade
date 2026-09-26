@@ -89,11 +89,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-const PORT = process.env.PORT || 5001;
+// Export app for Vercel serverless
+export default app;
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+// Start server locally (not on Vercel)
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5001;
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   });
-});
+} else {
+  // On Vercel, connect to DB on cold start
+  connectDB();
+}
